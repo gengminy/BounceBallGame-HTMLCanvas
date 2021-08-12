@@ -1,0 +1,208 @@
+<!Doctype html>
+<html>
+	<head>
+		<meta charset = "UTF-8">
+	</head>
+	<body>
+		<canvas id = "myCanvas" width="600" height="600" style="box-shadow: 2px 5px 20px 3px gray; transition: 0.3s;"></canvas>
+		
+		<script type="text/javascript" src="./class/stage.js"></script>
+		<script type="text/javascript" src="./class/ball.js"></script>
+		<script type="text/javascript" src="./class/block.js"></script>
+		<script type="text/javascript" src="./map/stagelist.js"></script>
+		<script type = "text/javascript">
+
+			const canvas = document.getElementById("myCanvas");
+			const ctx = canvas.getContext("2d");
+
+			let style = {
+				title1: {background: "#3689FF", border: "#3178FC"},
+				title2: {background: "#FFE908", border: "#EBD70C"},
+				button: {background: "#F5F5F5", border: "black", text: "black", hover: "#282828"},
+				ball: {background: "#FFD400", border: "" },
+			}
+
+			function drawOpening(){
+
+				Stage.drawText(canvas.width/19*6, canvas.height/3, 'BOUNCE', "70px", 1, style.title1.background, "Comic Sans MS", "center", true);
+				Stage.drawText(canvas.width/19*6, canvas.height/3, 'BOUNCE', "70px", 4, style.title1.border, "Comic Sans MS", "center", false);
+
+				Stage.drawText(canvas.width/19*15, canvas.height/3, 'BALL', "70px", 1, style.title2.background, "Comic Sans MS", "center", true);
+				Stage.drawText(canvas.width/19*15, canvas.height/3, 'BALL', "70px", 3, style.title2.border, "Comic Sans MS", "center", false);				
+
+				function drawRoundedButton(_x, _y, _width, _height, _r, _text, _fontSize=15, _textColor="black",  _buttonColor="white", _borderWidth="1px" , _borderColor="black"){
+					const pi = Math.PI;
+					const LT= {x: _x - _width/2 , y: _y - _height/2 - _fontSize/3};
+					const RT= {x: _x + _width/2, y: _y - _height/2 - _fontSize/3};
+					const RB= {x: _x + _width/2, y: _y + _height/2 - _fontSize/3};
+					const LB= {x: _x - _width/2, y: _y + _height/2 - _fontSize/3}
+
+					canvas.addEventListener("click", function(e){
+						const p = {x: e.clientX - this.offsetLeft, y: e.clientY - this.offsetTop}
+						if(ctx.isPointInPath(p.x, p.y)) draw();
+					})
+
+					function drawBody(_fill = _buttonColor , _border = _borderColor){
+						ctx.beginPath();
+						ctx.arc(LB.x + _r, LB.y - _r, _r, pi/2, pi);
+						ctx.arc(LT.x + _r, LT.y + _r, _r, pi, pi/2*3);
+						ctx.arc(RT.x - _r, RT.y + _r, _r, pi/2*3, pi*2);
+						ctx.arc(RB.x - _r, RB.y - _r, _r, 0, pi/2);
+						ctx.lineTo(LB.x + _r, LB.y);
+						ctx.lineWidth = _borderWidth;
+						ctx.strokeStyle = _border;
+						ctx.stroke();
+						ctx.lineWidth = 1;
+
+						ctx.fillStyle = _fill;
+						ctx.fill();
+					    ctx.closePath();
+					}
+
+
+					function addClickEvent(){
+
+                    }
+
+					drawBody();
+					Stage.drawText(_x, _y, _text, `${_fontSize}px`, 1, _textColor, "Comic Sans MS", "center", true);
+				}
+
+				drawRoundedButton(canvas.width/2, canvas.height/7*5, 200, 40, 20, "EDITOR", 20, style.button.text, style.button.background, 3 ,style.button.border);
+				drawRoundedButton(canvas.width/2, canvas.height/5*3, 200, 40, 20, "START", 20,style.button.text, style.button.background, 3 ,style.button.border);
+			}
+
+/*
+            function drawEditor(){
+            	const editorBall = new Ball(200, canvas.height-200, 8, Block.style.ball.background, document.querySelector("#myCanvas"))
+            	const _blockSize = 25
+            	const editorStage = new Stage(600, _blockSize, document.querySelector("#myCanvas"), ball);
+                const _margin = 10;
+
+                let row = 0;
+                let col = 0;
+
+
+                function drawAllBlock(){
+                    canvas.onclick = ()=>{}
+
+					for(let i in Block.type){
+						if(row*(_blockSize+_margin) >= Math.floor(canvas.width)){ row = 0; col++ };
+
+						const b = {x: row*(_blockSize + _margin) + _margin, y: col*(_blockSize + _margin)+_margin}
+						editorStage.createBlock(b.x, b.y, Block.type[i]);
+
+						canvas.addEventListener("click", function(e){
+							const p = {x: e.clientX - this.offsetLeft, y: e.clientY - this.offsetTop}
+							if(b.x-_margin/3 <= p.x && p.x <= b.x+_blockSize+_margin/3*2 && b.y-_margin/3 <= p.y && p.y <= b.y+_blockSize+_margin/3*2){
+								ctx.beginPath();
+								ctx.strokeStyle = "red";
+								ctx.rect(b.x-_margin/3, b.y-_margin/3, _blockSize+_margin/3*2, _blockSize+_margin/3*2);
+								ctx.lineWidth = 1.5;
+								ctx.stroke();
+								ctx.lineWidth = 1;
+								ctx.closePath();
+							}
+						});
+						row++;
+					}
+                }
+                drawAllBlock();
+
+                editorStage.drawBlock();
+
+                ctx.beginPath();
+                ctx.strokeStyle = "black";
+                ctx.rect(_margin/2, _margin/2, canvas.width-_margin, (col+1)*(_blockSize+_margin-1))
+                ctx.stroke();
+                ctx.closePath();
+            }
+*/
+
+
+            let ball = new Ball(200, canvas.height-200, 8, Block.style.ball.background, document.querySelector("#myCanvas"));
+            ball.setKeyboardEvent();
+
+            let stageTheme1 = new Stage(600, 30, document.querySelector("#myCanvas"), ball);
+            stageTheme1.setMap(0);
+
+            let animation = 1; //drawAnimation
+
+			function draw(){
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+
+				ball.draw();
+				stageTheme1.drawBlock();
+
+
+                let x = ball.getPos().x;
+                let y = ball.getPos().y;
+                let r = ball.getRadius();
+                let dx = ball.getDelta().dx;
+                let dy = ball.getDelta().dy;
+                let stageOrder = stageTheme1._config.order;
+                let stageName = `STAGE ${stageOrder}`;
+                let deathCount = stageTheme1._config.deathCount;
+                let score = `DEATH ${deathCount}`;
+
+                const maxValocity = ball.getMaxValocity();
+                const blockSize = stageTheme1._config.blockSize;
+
+
+                //충돌 감지 안될때만 이동, 감지되면 자동으로 벽에 붙음
+                if(!stageTheme1.collisionDetectX())
+				    ball.move(dx, 0);
+				
+				if(!stageTheme1.collisionDetectY())
+				    ball.move(0, dy);
+
+
+                //정보 관련 입력
+                Stage.drawText(565, 50, stageName, "16px", 1.2, "black", "san-serif", "end");
+                Stage.drawText(565, 50, stageName, "16px", 1.2, "black", "san-serif", "end", true);
+                Stage.drawText(565, 65, score, "15px", 1.2, "black", "san-serif", "end");
+                Stage.drawText(565, 65, score, "15px", 1.2, "black", "san-serif", "end", true);
+
+                //죽을때 500ms 동안 사망 이펙트 출력
+                if(ball.isDying())
+                    ball.drawDyingEffect();
+
+                //블록 부수는 이펙트 출력
+                if(ball.isBreaking())
+                    ball.drawBreakingEffect();
+
+
+                //캔버스 벽 우측으로 넘어가면 다음 스테이지로
+				if(x+r+dx > canvas.width) 
+					stageTheme1.setNextMap();
+				
+				//추락하면 부활
+				if (y > canvas.height){ 
+				    ball.move(0, -40);
+                    stageTheme1.revive();
+				}
+
+				//화살표 블록으로 인한 활강중이 아닐때만 중력 적용
+				if(!ball.isFlying())
+					ball.setGravity();
+				
+				//키 입력하면 활강 중단
+				if(ball.isRightPressed() || ball.isLeftPressed())
+				    ball.setFlyingStatement(false);
+
+				//우측이동
+				if(ball.isRightPressed() && x < canvas.width - r && dx + 1.2 <= maxValocity){
+					ball._.dx += 1.2;
+				} else if( ball.isLeftPressed() && x > r && dx - 1.2 >= -maxValocity){ //좌측이동
+					ball._.dx -= 1.2;
+				}
+                animation = requestAnimationFrame(draw);
+			}
+			drawOpening();
+
+			//drawEditor();
+
+		</script>
+	</body>
+</html>
